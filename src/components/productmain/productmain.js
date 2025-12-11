@@ -89,15 +89,39 @@ const Productmain1 = ({
 
   // Combine images: main product image, additional images, then variant images
   const allImages = [
-    data.image, // Main product image
+    data.image, // Main product image (first image)
     ...(data.additionalImages || []), // Additional images
     ...(data.variants?.map((variant) => variant.image) || []), // Variant images
   ].filter((img) => img && typeof img === "string" && img.trim() !== "");
+
+  // Create main product variant object (for first image)
+  const mainProductVariant = {
+    variantTitle: data.title,
+    variantDescription: data.description,
+    price: data.price || "4.00",
+    salePrice: data.salePrice,
+    sku: data.sku || "#123456",
+    variantDetail: data.variantDetail || {},
+    specifications: data.specifications || [],
+    detailTitle: data.detailTitle,
+    detailSubtitle: data.detailSubtitle,
+    detailDescription: data.detailDescription || [],
+  };
+
+  // Determine which variant data to use
+  // If selectedImageIndex is 0 (first image), use main product variant
+  // If currentVariant exists, use that variant
+  // Otherwise use main product variant as default
+  const displayVariant =
+    selectedImageIndex === 0
+      ? mainProductVariant
+      : currentVariant || mainProductVariant;
 
   // Debug: Log images and other props
   console.log("Productmain1 - All Images:", allImages);
   console.log("Productmain1 - Selected Image Index:", selectedImageIndex);
   console.log("Productmain1 - Current Variant:", currentVariant);
+  console.log("Productmain1 - Display Variant:", displayVariant);
   console.log("Productmain1 - Product Data:", data);
 
   const rating = 4.5;
@@ -171,13 +195,13 @@ const Productmain1 = ({
     }
   };
 
-  // Get display data - use variant if available, otherwise use main product
-  const displayTitle = currentVariant?.variantTitle || data.title;
+  // Get display data - use displayVariant (which handles main product as variant)
+  const displayTitle = displayVariant?.variantTitle || data.title;
   const displayDescription =
-    currentVariant?.variantDescription || data.description;
-  const displayPrice = currentVariant?.price || data.price || "4.00";
-  const displaySalePrice = currentVariant?.salePrice || data.salePrice;
-  const displaySku = currentVariant?.sku || data.sku || "#123456";
+    displayVariant?.variantDescription || data.description;
+  const displayPrice = displayVariant?.price || data.price || "4.00";
+  const displaySalePrice = displayVariant?.salePrice || data.salePrice;
+  const displaySku = displayVariant?.sku || data.sku || "#123456";
 
   const text = displayDescription;
   const toggleReadMore = () => setIsExpanded(!isExpanded);
@@ -495,9 +519,9 @@ const Productmain1 = ({
         </Col>
       </Row>
       <div>
-        <Productdetail1 data={data} currentVariant={currentVariant} />
-        <ProductSpecs data={data} currentVariant={currentVariant} />
-        <Productdescription data={data} currentVariant={currentVariant} />
+        <Productdetail1 data={data} currentVariant={displayVariant} />
+        <ProductSpecs data={data} currentVariant={displayVariant} />
+        <Productdescription data={data} currentVariant={displayVariant} />
       </div>
     </div>
   );

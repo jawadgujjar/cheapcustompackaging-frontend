@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Carousel } from "antd";
 import "antd/dist/reset.css";
 import "./productimgs.css";
@@ -12,31 +12,51 @@ function Productimgs1({ images, selectedIndex, onImageSelect, title }) {
   });
   const carouselRef = useRef(null);
 
+  // Use a ref to track if we should call onImageSelect
+  const shouldUpdateParentRef = useRef(true);
+
   // Filter out invalid images
   const validImages =
     images?.filter(
       (img) => img && typeof img === "string" && img.trim() !== ""
     ) || [];
 
+  // Update local state when parent changes selectedIndex
   useEffect(() => {
     const newIndex = Math.max(
       0,
       Math.min(selectedIndex, validImages.length - 1)
     );
-    setSelectedImage(newIndex);
-    if (carouselRef.current) {
-      carouselRef.current.goTo(newIndex, false);
+
+    // Only update if the index actually changed
+    if (newIndex !== selectedImage) {
+      setSelectedImage(newIndex);
+      if (carouselRef.current) {
+        carouselRef.current.goTo(newIndex, false);
+      }
     }
   }, [selectedIndex, validImages.length]);
 
   const handleThumbnailClick = (index) => {
+    if (index === selectedImage) return; // Don't do anything if same image
+
     setSelectedImage(index);
     if (carouselRef.current) {
       carouselRef.current.goTo(index, false);
     }
-    if (typeof onImageSelect === "function") {
+
+    // Call parent only if function exists and index changed
+    if (typeof onImageSelect === "function" && shouldUpdateParentRef.current) {
       onImageSelect(index);
     }
+  };
+
+  // Handle carousel change - NO parent update from here
+  const handleCarouselChange = (from, to) => {
+    setSelectedImage(to);
+
+    // Don't call parent from carousel change to prevent loop
+    // Parent will update through thumbnail click only
   };
 
   const handleMouseMove = (e) => {
@@ -129,12 +149,9 @@ function Productimgs1({ images, selectedIndex, onImageSelect, title }) {
           speed={500}
           slidesToShow={1}
           slidesToScroll={1}
-          beforeChange={(from, to) => {
-            setSelectedImage(to);
-            if (typeof onImageSelect === "function") {
-              onImageSelect(to);
-            }
-          }}
+          beforeChange={handleCarouselChange}
+          swipe={true}
+          draggable={true}
         >
           {validImages.map((src, index) => (
             <div key={index} className="slide-container">
