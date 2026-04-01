@@ -25,7 +25,7 @@ function ProductSpecs({ currentVariant = {}, data = {} }) {
         "Made with versatility and durability in mind, our 32 ECT mailer boxes can hold between 30 and 40 pounds of product.",
       icon: "📦",
     },
-    {
+    { 
       _id: "3",
       title: "Two-Sided Printing",
       description:

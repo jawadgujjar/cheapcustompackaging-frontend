@@ -111,12 +111,12 @@ function Contactus() {
                 support@sireprinting.co.uk
               </a>
             </div>
-            <div className="info-item">
+            {/* <div className="info-item">
               <IoLocationSharp style={{ fontSize: "26px" }} />
               <span className="info-text1">
                 5 South Charlotte Street Edinburgh EH2 4AN
               </span>
-            </div>
+            </div> */}
           </Col>
         </Row>
       </div>
